@@ -21,68 +21,60 @@
 #  THE SOFTWARE.
 
 FROM ubuntu:16.04
-MAINTAINER Thibault Friedrich <thibault.friedrich@pollen-metrology.com>
+MAINTAINER Pollen Metrology <admin-team@pollen-metrology.com>
 
 # https://docs.docker.com/get-started/part2/#build-the-app
 # https://github.com/shufo/jenkins-slave-ubuntu/blob/master/Dockerfile
 # https://github.com/jenkinsci/docker-slave
 # https://github.com/jenkinsci/docker-jnlp-slave
 
-RUN apt-get update
+ARG VERSION=3.28
+ARG user=jenkins
+ARG group=jenkins
+ARG uid=2222
 
-# Install JDK 7 (latest edition)
-RUN apt-get install -y --no-install-recommends default-jdk
+RUN apt-get clean
+RUN apt update
+
+# Install JDK latest edition
+RUN apt install -y --no-install-recommends default-jdk
 
 # Install utilities
-RUN apt-get install -y git wget curl python-virtualenv python-pip build-essential python-dev graphviz locales locales-all
+RUN apt install -y git wget curl python-virtualenv python-pip build-essential python-dev \
+	graphviz locales locales-all bind9-host iputils-ping
 
 RUN apt install -y libeigen3-dev libxt-dev libtiff-dev libpng-dev libjpeg-dev libopenblas-dev \
 	xvfb libusb-dev
 
+# Conan now needs Python 3 (and is not needed in this flavour)
+# RUN python -m pip install --upgrade pip conan
+
 # QT5 development
 RUN apt install -y qttools5-dev-tools libqt5opengl5-dev libqt5svg5-dev \
 libqt5webkit5-dev libqt5xmlpatterns5-dev libqt5xmlpatterns5-private-dev \
-qt5-default qtbase5-dev qtbase5-dev-tools qtchooser \
-qtdeclarative5-dev qtscript5-dev qttools5-dev qttools5-private-dev \
-libqt5websockets5-dev
+qt5-default qtbase5-dev qtbase5-dev-tools qtchooser qtscript5-dev \
+qtdeclarative5-dev qttools5-dev qttools5-private-dev libqt5websockets5-dev
+
+# VTK conan package building dependencies
+RUN apt install -y freeglut3-dev mesa-common-dev mesa-utils-extra \
+libgl1-mesa-dev libglapi-mesa libsm-dev libx11-dev libxext-dev \
+libxt-dev libglu1-mesa-dev
 
 # Install compilation utilities
-RUN apt-get install -y g++-5 cmake lsb-core doxygen lcov
-
-# Install LaTex environment needed for documentation compilation
-RUN apt install -y texlive texlive-base texlive-bibtex-extra texlive-binaries texlive-extra-utils \
-texlive-font-utils texlive-fonts-recommended texlive-generic-extra texlive-generic-recommended \
-texlive-lang-french texlive-latex-base texlive-latex-extra texlive-latex-recommended \
-texlive-pictures texlive-pstricks texlive-science biber latexmk
+RUN apt install -y g++-5 cmake lsb-core doxygen lcov
 
 # Install last fresh cppcheck binary
-RUN apt install -y libpcre3-dev
-RUN cd / tmp && wget https://github.com/danmar/cppcheck/archive/1.82.tar.gz;  \
-	tar zxvf 1.82.tar.gz && \
-	cd cppcheck-1.82 && \
-	make SRCDIR=build CFGDIR=/usr/bin/cfg HAVE_RULES=yes && \
+RUN apt install -y libpcre3-dev unzip
+RUN cd /tmp && mkdir cppcheck && wget https://github.com/danmar/cppcheck/archive/1.86.zip ;  \
+	unzip -a 1.86.zip && \
+	cd cppcheck-1.86 && \
+	make -j4 SRCDIR=build CFGDIR=/usr/bin/cfg HAVE_RULES=yes CXXFLAGS="-O2 -DNDEBUG -Wall -Wno-sign-compare -Wno-unused-function" && \
 	make install PREFIX=/usr CFGDIR=/usr/share/cppcheck/ && \
-	cd .. && \
-	rm -rf 1.82.tar.gz cppcheck-1.82
-
-
-# Install node
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
-RUN apt-get install -y nodejs
-
-# Install yarn
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-RUN apt-get update && apt-get install yarn
-
-# Install chrome
-RUN apt-get install -y chromium-browser
-RUN update-alternatives --install /usr/bin/chrome chrome-browser /usr/bin/chromium-browser 100
-
-#### CHECK
+	cd /tmp && \
+	rm -rf cppcheck
 
 # Add user jenkins to the image
-RUN adduser --system --quiet jenkins --firstuid 2000 
+RUN adduser --system --quiet --uid ${uid} --group --disabled-login ${user}
 
 # Install Phabricator-related tools
 RUN apt install -y php7.0-cli php7.0-curl
@@ -94,25 +86,20 @@ RUN cd /home/phabricator && git clone https://github.com/phacility/libphutil.git
 RUN mv /home/phabricator/arcanist/bin/arc.bat /home/phabricator/arcanist/bin/arc.bat.old
 RUN ln -s /home/phabricator/arcanist/bin/arc /usr/bin/arc.bat
 
-ARG VERSION=3.15
-ARG AGENT_WORKDIR=/home/jenkins/agent
 
 RUN curl --create-dirs -sSLo /usr/share/jenkins/slave.jar https://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/${VERSION}/remoting-${VERSION}.jar \
   && chmod 755 /usr/share/jenkins \
   && chmod 644 /usr/share/jenkins/slave.jar
 
 # USER jenkins
+RUN echo "${USER} ALL = NOPASSWD : /usr/bin/apt-get" >> /etc/sudoers.d/jenkins-can-install 
 ENV AGENT_WORKDIR=${AGENT_WORKDIR}
-RUN mkdir /home/jenkins/.jenkins && mkdir -p ${AGENT_WORKDIR}
+RUN mkdir -p ${AGENT_WORKDIR}
 
-VOLUME /home/jenkins/.jenkins
-VOLUME ${AGENT_WORKDIR}
-WORKDIR /home/jenkins
-
-RUN mkdir -p /home/pollen && ln -s /home/pollen /pollen
+RUN mkdir -p /home/pollen && chown jenkins:jenkins /home/pollen && ln -s /home/pollen /pollen
 
 # If you put this label at the beginning of the Dockerfile, docker seems to use cache and build fails more often
-LABEL Description="This is a base image, which provides the Jenkins agent executable (slave.jar)" Vendor="Jenkins project" Version="3.15"
+LABEL Description="This is a base image, which provides the Jenkins agent executable (slave.jar)" Vendor="Jenkins project" Version="1.2"
 
 # Set the locale
 RUN locale-gen en_US.UTF-8
