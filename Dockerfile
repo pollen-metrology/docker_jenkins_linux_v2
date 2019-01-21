@@ -92,9 +92,8 @@ RUN curl --create-dirs -sSLo /usr/share/jenkins/slave.jar https://repo.jenkins-c
   && chmod 644 /usr/share/jenkins/slave.jar
 
 # USER jenkins
+RUN apt install sudo
 RUN echo "${USER} ALL = NOPASSWD : /usr/bin/apt-get" >> /etc/sudoers.d/jenkins-can-install 
-ENV AGENT_WORKDIR=${AGENT_WORKDIR}
-RUN mkdir -p ${AGENT_WORKDIR}
 
 RUN mkdir -p /home/pollen && chown jenkins:jenkins /home/pollen && ln -s /home/pollen /pollen
 
