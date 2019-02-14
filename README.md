@@ -33,6 +33,8 @@ sudo docker run  \
 * install latex libraries
 * install node (v8.x)
 * install yarn (last version)
+* install cppcheck 1.86
+* install lcov 1.13
 
 ## More
 
