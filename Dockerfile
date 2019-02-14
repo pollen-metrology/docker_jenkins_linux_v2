@@ -65,13 +65,21 @@ RUN apt install -y g++-5 cmake lsb-core doxygen lcov
 
 # Install last fresh cppcheck binary
 RUN apt install -y libpcre3-dev unzip
-RUN cd /tmp && mkdir cppcheck && wget https://github.com/danmar/cppcheck/archive/1.86.zip ;  \
+RUN cd /tmp && mkdir cppcheck && cd cppcheck && wget https://github.com/danmar/cppcheck/archive/1.86.zip ;  \
 	unzip -a 1.86.zip && \
 	cd cppcheck-1.86 && \
 	make -j4 SRCDIR=build CFGDIR=/usr/bin/cfg HAVE_RULES=yes CXXFLAGS="-O2 -DNDEBUG -Wall -Wno-sign-compare -Wno-unused-function" && \
 	make install PREFIX=/usr CFGDIR=/usr/share/cppcheck/ && \
 	cd /tmp && \
 	rm -rf cppcheck
+
+# Install last fresh lcov binary
+RUN cd /tmp && mkdir lcov && cd lcov && wget https://sourceforge.net/projects/ltp/files/Coverage%20Analysis/LCOV-1.13/lcov-1.13.tar.gz ;  \
+	tar xvfz lcov-1.13.tar.gz && \
+	cd lcov-1.13 && \
+	make install PREFIX=/usr CFGDIR=/usr/share/lcov/ && \
+	cd /tmp && \
+	rm -rf lcov
 
 # Add user jenkins to the image
 RUN adduser --system --quiet --uid ${uid} --group --disabled-login ${user}
@@ -97,6 +105,10 @@ RUN echo "${user} ALL = NOPASSWD : /usr/bin/apt-get" >> /etc/sudoers.d/jenkins-c
 
 RUN mkdir -p /home/pollen && chown jenkins:jenkins /home/pollen && ln -s /home/pollen /pollen
 
+# Create a folder for script and copy coverage_validator into it
+RUN mkdir -p /home/script && chown jenkins:jenkins /home/script
+COPY coverage_validator.sh /home/script
+ 
 # If you put this label at the beginning of the Dockerfile, docker seems to use cache and build fails more often
 LABEL Description="This is a base image, which provides the Jenkins agent executable (slave.jar)" Vendor="Jenkins project" Version="1.2"
 
