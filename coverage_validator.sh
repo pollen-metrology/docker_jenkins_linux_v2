@@ -1,12 +1,12 @@
 #!/bin/bash
 counter=0
 isPassing=0
-globalLines=57.0
-globalFunctions=55.3
-pluginsLines=29.0
-pluginsFunctions=37.6
-modulesLines=70.9
-modulesFunctions=62.2
+globalLines=50.0
+globalFunctions=50.0
+pluginsLines=25.0
+pluginsFunctions=35.0
+modulesLines=68.0
+modulesFunctions=60.0
 while read value
 do
    if [ "$counter" -eq 0  ];then
