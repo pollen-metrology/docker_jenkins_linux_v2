@@ -7,6 +7,7 @@ pluginsLines=25.0
 pluginsFunctions=35.0
 modulesLines=68.0
 modulesFunctions=60.0
+
 while read value
 do
    if [ "$counter" -eq 0  ];then
@@ -32,7 +33,7 @@ do
          printf --  "Plugins coverage for lines: $value%% \n"
          let "counter++"
       else
-         printf --  "Plugins coverage for lines: $value%% (under accpetable limit = $pluginsLines%%) \n"
+         printf --  "Plugins coverage for lines: $value%% (under acceptable limit = $pluginsLines%%) \n"
          isPassing=1
          let "counter++"
       fi
@@ -50,7 +51,7 @@ do
          printf -- "Modules coverage for lines: $value%% \n"
          let "counter++"
       else
-         printf --  "Modules coverage for lines: $value%% (under accceptable limit = $modulesLines%%) \n"
+         printf --  "Modules coverage for lines: $value%% (under acceptable limit = $modulesLines%%) \n"
          isPassing=1
          let "counter++"
       fi
