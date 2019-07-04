@@ -44,7 +44,7 @@ RUN apt install -y git wget curl python-virtualenv python-pip build-essential py
 	graphviz locales locales-all bind9-host iputils-ping
 
 RUN apt install -y libeigen3-dev libxt-dev libtiff-dev libpng-dev libjpeg-dev libopenblas-dev \
-	xvfb libusb-dev
+	xvfb libusb-dev libwrap0-dev
 
 # Conan now needs Python 3 (and is not needed in this flavour)
 # RUN python -m pip install --upgrade pip conan
