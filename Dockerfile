@@ -46,6 +46,9 @@ RUN apt install -y git wget curl python-virtualenv python-pip build-essential py
 RUN apt install -y libeigen3-dev libxt-dev libtiff-dev libpng-dev libjpeg-dev libopenblas-dev \
 	xvfb libusb-dev libwrap0-dev
 
+# Mandatory packages for MITK build
+RUN apt install -y libfreetype6-dev libharfbuzz-dev libgtk2.0-dev 
+
 # Conan now needs Python 3 (and is not needed in this flavour)
 # RUN python -m pip install --upgrade pip conan
 
