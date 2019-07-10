@@ -37,37 +37,37 @@ RUN apt-get clean
 RUN apt update
 
 # Install JDK latest edition
-RUN apt install -y --no-install-recommends default-jdk
+RUN apt-get update && apt-get install -y --no-install-recommends default-jdk
 
 # Install utilities
-RUN apt install -y git wget curl python-virtualenv python-pip build-essential python-dev \
+RUN apt-get update && apt-get install -y git wget curl python-virtualenv python-pip build-essential python-dev \
 	graphviz locales locales-all bind9-host iputils-ping
 
-RUN apt install -y libeigen3-dev libxt-dev libtiff-dev libpng-dev libjpeg-dev libopenblas-dev \
+RUN apt-get update && apt-get install -y libeigen3-dev libxt-dev libtiff-dev libpng-dev libjpeg-dev libopenblas-dev \
 	xvfb libusb-dev libwrap0-dev
 
 # Mandatory packages for MITK build
-RUN apt install -y libfreetype6-dev libharfbuzz-dev libgtk2.0-dev 
+RUN apt-get update && apt-get install -y libfreetype6-dev libharfbuzz-dev libgtk2.0-dev 
 
 # Conan now needs Python 3 (and is not needed in this flavour)
 # RUN python -m pip install --upgrade pip conan
 
 # QT5 development
-RUN apt install -y qttools5-dev-tools libqt5opengl5-dev libqt5svg5-dev \
+RUN apt-get update && apt-get install -y qttools5-dev-tools libqt5opengl5-dev libqt5svg5-dev \
 libqt5webkit5-dev libqt5xmlpatterns5-dev libqt5xmlpatterns5-private-dev \
 qt5-default qtbase5-dev qtbase5-dev-tools qtchooser qtscript5-dev \
 qtdeclarative5-dev qttools5-dev qttools5-private-dev libqt5websockets5-dev
 
 # VTK conan package building dependencies
-RUN apt install -y freeglut3-dev mesa-common-dev mesa-utils-extra \
+RUN apt-get update && apt-get install -y freeglut3-dev mesa-common-dev mesa-utils-extra \
 libgl1-mesa-dev libglapi-mesa libsm-dev libx11-dev libxext-dev \
 libxt-dev libglu1-mesa-dev
 
 # Install compilation utilities
-RUN apt install -y g++-5 cmake lsb-core doxygen lcov
+RUN apt-get update && apt-get install -y g++-5 cmake lsb-core doxygen lcov
 
 # Install last fresh cppcheck binary
-RUN apt install -y libpcre3-dev unzip
+RUN apt-get update && apt-get install -y libpcre3-dev unzip
 RUN cd /tmp && mkdir cppcheck && cd cppcheck && wget https://github.com/danmar/cppcheck/archive/1.86.zip ;  \
 	unzip -a 1.86.zip && \
 	cd cppcheck-1.86 && \
@@ -88,7 +88,7 @@ RUN cd /tmp && mkdir lcov && cd lcov && wget https://sourceforge.net/projects/lt
 RUN adduser --system --quiet --uid ${uid} --group --disabled-login ${user}
 
 # Install Phabricator-related tools
-RUN apt install -y php7.0-cli php7.0-curl
+RUN apt-get update && apt-get install -y php7.0-cli php7.0-curl
 RUN mkdir -p /home/phabricator
 RUN cd /home/phabricator && git clone https://github.com/phacility/arcanist.git
 RUN cd /home/phabricator && git clone https://github.com/phacility/libphutil.git
@@ -103,7 +103,7 @@ RUN curl --create-dirs -sSLo /usr/share/jenkins/slave.jar https://repo.jenkins-c
   && chmod 644 /usr/share/jenkins/slave.jar
 
 # USER jenkins
-RUN apt install sudo
+RUN apt-get update && apt-get install sudo
 RUN echo "${user} ALL = NOPASSWD : /usr/bin/apt-get" >> /etc/sudoers.d/jenkins-can-install 
 
 RUN mkdir -p /home/pollen && chown jenkins:jenkins /home/pollen && ln -s /home/pollen /pollen
