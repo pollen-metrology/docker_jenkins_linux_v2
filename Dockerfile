@@ -41,7 +41,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends default-jdk
 
 # Install utilities
 RUN apt-get update && apt-get install -y git wget curl python-virtualenv python-pip build-essential python-dev \
-	graphviz locales locales-all bind9-host iputils-ping
+	graphviz locales locales-all bind9-host iputils-ping python3-pip
+RUN pip3 install conan
 
 RUN apt-get update && apt-get install -y libeigen3-dev libxt-dev libtiff-dev libpng-dev libjpeg-dev libopenblas-dev \
 	xvfb libusb-dev libwrap0-dev
