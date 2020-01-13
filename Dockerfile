@@ -89,7 +89,7 @@ RUN cd /tmp && mkdir lcov && cd lcov && wget https://sourceforge.net/projects/lt
 RUN adduser --system --quiet --uid ${uid} --group --disabled-login ${user}
 
 # Install Phabricator-related tools
-RUN apt-get update && apt-get install -y php7.0-cli php7.0-curl
+RUN apt-get update && apt-get install -y php7.0-cli php7.0-curl php7.0-xml
 RUN mkdir -p /home/phabricator
 RUN cd /home/phabricator && git clone https://github.com/phacility/arcanist.git
 RUN cd /home/phabricator && git clone https://github.com/phacility/libphutil.git
