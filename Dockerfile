@@ -28,7 +28,7 @@ MAINTAINER Pollen Metrology <admin-team@pollen-metrology.com>
 # https://github.com/jenkinsci/docker-slave
 # https://github.com/jenkinsci/docker-jnlp-slave
 
-ARG VERSION=3.28
+ARG VERSION=3.35
 ARG user=jenkins
 ARG group=jenkins
 ARG uid=2222
@@ -76,6 +76,9 @@ RUN cd /tmp && mkdir cppcheck && cd cppcheck && wget https://github.com/danmar/c
 	make install PREFIX=/usr FILESDIR=/usr/share/cppcheck/ && \
 	cd /tmp && \
 	rm -rf cppcheck
+
+# Install shell linter
+RUN apt-get update && apt-get install -y shellcheck
 
 # Install last fresh lcov binary
 RUN cd /tmp && mkdir lcov && cd lcov && wget https://sourceforge.net/projects/ltp/files/Coverage%20Analysis/LCOV-1.13/lcov-1.13.tar.gz ;  \
